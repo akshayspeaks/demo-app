@@ -9,13 +9,16 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.ErrorCodes
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
+import com.razorpay.Checkout
+import com.razorpay.PaymentResultListener
+import kotlinx.android.synthetic.main.activity_home.*
 import java.util.Arrays.asList
 
 
 
-class HomeActivity : AppCompatActivity() {
-
+class HomeActivity : AppCompatActivity(),PaymentResultListener {
     private val req_code = 10
+
     val auth = FirebaseAuth.getInstance()!!
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,8 +31,10 @@ class HomeActivity : AppCompatActivity() {
         else{
             startSignUpProcess()
         }
+        razorpay_button.setOnClickListener{
+            Checkout().open(this,RazorpayUtil.getOptions())
+        }
     }
-
     private fun startSignUpProcess() {
         val providers = asList(
                 AuthUI.IdpConfig.PhoneBuilder().build())
@@ -73,7 +78,16 @@ class HomeActivity : AppCompatActivity() {
             }
         }
     }
+
     fun showSnackbar(msg : String){
         Snackbar.make(findViewById(R.id.home_activity_container), msg, Snackbar.LENGTH_LONG).show()
+    }
+
+    override fun onPaymentError(p0: Int, p1: String?) {
+        showSnackbar("Payment Unsuccessful")
+    }
+
+    override fun onPaymentSuccess(p0: String?) {
+        showSnackbar("Payment Received ")
     }
 }
